@@ -1,51 +1,57 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const dbNotes = require('./db/db.json');
+const db_notes = require('./db/db.json');
 const app = express();
 const PORT = process.env.PORT || 3001;
+
 
 app.use(express.static('public'));
 
 app.use(express.json());
 
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({
+    extended: true
 
+}));
+
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/notes.html'));
+});
+// GET /api/notes db.json
 app.get('/api/notes', (req, res) => {
-    fs.readFile('/db/db.json', 'utf-8', (err, data) => {
+    fs.readFile('./db/db.json', 'utf-8', (err, data) => {
         if (err) throw err;
         res.json(JSON.parse(data));
     });
 });
-
-//Post notes and recieve new notes and dataj
+//POST /api/notes recieve new note data and console log 
 app.post('/api/notes', (req, res) => {
     const data = {
+        id: uniqid(),
         title: req.body.title,
         text: req.body.text
     };
     console.log(data);
-    dbNotes.push(data);
-    fs.writeFile('/db/db.json', JSON.stringify(dbNotes), () => {
-        res.send('Success!')
+    db_notes.push(data);
+    fs.writeFile('./db/db.json', JSON.stringify(db_notes), () => {
+        res.send('Data pushed successfully!');
     });
 });
-
-//Deletes note using specific id
+// DELETE using params to delete note with id
 app.delete('/api/notes/:id', (req, res) => {
     const params = req.params.id;
-    const deleteArray = dbNotes.filter(arrayContents => arrayContents.id != params);
-    console.log(deleteArray);
-    fs.writeFile('/db/db.json', JSON.stringify(deleteArray), () => {
-        res.send('Deleted successfully!');
+    const deleteArr = db_notes.filter(arrayContents => arrayContents.id != params);
+    console.log(deleteArr);
+    fs.writeFile('./db/db.json', JSON.stringify(deleteArr), () => {
+        res.send('Note deleted successfully!');
     });
 });
-
-//Route index.html
+// GET index.html route
 app.get('*', (req, res) => {
-    res.sendFile(path.join(_dirname, '/public/index.html'));
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log('Server up and running at ${PORT}!');
+    console.log(`Server is up and running at ${PORT}!`);
 });
