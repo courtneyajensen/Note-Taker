@@ -1,49 +1,52 @@
-const fs = require('fs');
-const path = require('path');
 const express = require('express');
-const util = require('util');
+const path = require('path');
+const fs = require('fs');
+const dbNotes = require('./db/db.json');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.use(express.static('public'));
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('./Develop/public'));
 
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
-
-app.get('/', (req, res) =>
-    res.sendFile(path.join(__dirname, './Develop/public/index.html'))
-);
-
-app.get('/notes', (req, res) =>
-    res.sendFile(path.join(__dirname, './Develop/public/notes.html'))
-);
+app.use(express.urlencoded({extended:true}));
 
 app.get('/api/notes', (req, res) => {
-    readFileAsync('./Develop/db/db.json').then(function (data) {
-        notes = [].concat(JSON.parse(data))
-        res.json(notes);
-    })}
-);
+    fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+        if (err) throw err;
+        res.json(JSON.parse(data));
+    });
+});
 
+//Post notes and recieve new notes and dataj
 app.post('/api/notes', (req, res) => {
-    const note = req.body;
-    readFileAsync('./Develop/db/db.json').then(function (data) {
-        notes = [].concat(JSON.parse(data));
-        note.id = notes.length + 1;
-        notes.push(note);
-        return notes
-    }).then(function (notes) {
-        writeFileAsync('./Develop/db/db.json', JSON.stringify(notes))
-        res.json(note);
-    })}
-);
+    const data = {
+        id: uniqueid(),
+        title: req.body.title,
+        text: req.body.text
+    };
+    console.log(data);
+    dbNotes.push(data);
+    fs.writeFile('./db/db.json', JSON.stringify(dbNotes), () => {
+        res.send('Success!')
+    });
+});
 
+//Deletes note using specific id
+app.delete('/api/notes/:id', (req, res) => {
+    const params = req.params.id;
+    const deleteArray = dbNotes.filter(arrayContents => arrayContents.id != params);
+    console.log(deleteArray);
+    fs.writeFile('./db/db.json', JSON.stringify(deleteArray), () => {
+        res.send('Deleted successfully!');
+    });
+});
+
+//Route index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, './Develop/public/index.html'))
-  });
+    res.sendFile(path.join(_dirname, './public/index.html'));
+});
 
-app.listen(PORT, () =>
-    console.log(`Listening at http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+    console.log('Server up and running at ${PORT}!');
+});
