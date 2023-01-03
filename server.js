@@ -7,21 +7,21 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('./public'));
+app.use(express.static('./Develop/public'));
 
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 
 app.get('/', (req, res) =>
-    res.sendFile(path.join(__dirname, './develop/public/index.html'))
+    res.sendFile(path.join(__dirname, './Develop/public/index.html'))
 );
 
 app.get('/notes', (req, res) =>
-    res.sendFile(path.join(__dirname, './develop/public/notes.html'))
+    res.sendFile(path.join(__dirname, './Develop/public/notes.html'))
 );
 
 app.get('/api/notes', (req, res) => {
-    readFileAsync('./db/db.json').then(function (data) {
+    readFileAsync('./Develop/db/db.json').then(function (data) {
         notes = [].concat(JSON.parse(data))
         res.json(notes);
     })}
@@ -29,19 +29,19 @@ app.get('/api/notes', (req, res) => {
 
 app.post('/api/notes', (req, res) => {
     const note = req.body;
-    readFileAsync('./db/db.json').then(function (data) {
+    readFileAsync('./Develop/db/db.json').then(function (data) {
         notes = [].concat(JSON.parse(data));
         note.id = notes.length + 1;
         notes.push(note);
         return notes
     }).then(function (notes) {
-        writeFileAsync('./db/db.json', JSON.stringify(notes))
+        writeFileAsync('./Develop/db/db.json', JSON.stringify(notes))
         res.json(note);
     })}
 );
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'))
+    res.sendFile(path.join(__dirname, './Develop/public/index.html'))
   });
 
 app.listen(PORT, () =>
