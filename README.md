@@ -11,8 +11,7 @@
 * [Credits](#credits)
 
  ## Description <a name="description"></a>
- For this challenge I was given the task to set up a server.js file and add the correct GET and POST methods for the html files that were provided in the starter code. This app will allow users to write and save notes so that they be able to keep track of tasks that they need to do.
- ![functioning-app](insert link to screenshot here)
+This app uses GET and POST methods that allow users to write and save notes to keep track of things that need to be done.
 
  ## Installation <a name="installation"></a>
  Run 'npm install' in the command line of git bash as well as 'npm i inquirer'. The next command you will run is 'node server.js' this gets the server up and running.
